@@ -4,7 +4,8 @@
   "description": "",
   "main": "parse.js",
   "bin": {
-    "rofi-chrome-bookmarks": "rofi-chrome-bookmarks.sh"
+    "rofi-chrome-bookmarks": "rofi-chrome-bookmarks.sh",
+    "parse-chrome-bookmarks": "parse.js"
   },
   "scripts": {
     "start": "node parse.js \"/home/$USER/.config/google-chrome/Profile 1/Bookmarks\"",
