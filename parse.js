@@ -1,38 +1,31 @@
 #!/usr/bin/env node
 const { readFileSync } = require('fs');
-const childprocess = require('child_process');
 
 if (process.argv.length < 3) {
   console.log('At least one argument is required');
   process.exit(1);
 }
 
-const filepath = process.argv[2];
+const [, , bookmarkFilepath] = process.argv;
 
 (async () => {
-  const file = JSON.parse(await readFileSync(filepath, 'utf-8').toString());
+  const file = JSON.parse(await readFileSync(bookmarkFilepath, 'utf-8').toString());
 
+  // chrome has two root properties containing bookmarks - others could potentially be added
   const roots = ['bookmark_bar', 'other'];
 
-  const bookmarks = [];
-  const findBookmarks = node => {
-    if (node.type === 'folder') {
-      node.children.forEach(c => findBookmarks(c));
-    } else {
-      bookmarks.push({
+  const findBookmarks = (node) => {
+    if (node.type === "folder") return node.children.flatMap(findBookmarks);
+    return [
+      {
         name: node.name,
         url: node.url,
-      });
-    }
-  }
+      },
+    ];
+  };
+  const bookmarks = roots.flatMap(root => file.roots[root].children.flatMap(findBookmarks));
 
-  roots.forEach(root => {
-    const marks = file.roots[root];
-    marks.children.forEach(c => findBookmarks(c));
-  });
-
-  // console.log(JSON.stringify(bookmarks, null, 2))
-  const output = bookmarks.map(b => `"${b.name}" "${b.url}"`).join('\n')
+  const output = bookmarks.map(b => `${b.name};${b.url}`).join('\n')
   console.log(output);
 })();
 
